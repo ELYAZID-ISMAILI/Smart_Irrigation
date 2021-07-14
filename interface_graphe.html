@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+<style>
+ #collectionsTop {
+width: 100%;
+height:100%;
+}
+.topRight {
+width:50%;
+height:100%;
+float:right;
+}
+.topLeft {
+width:50%;
+height:100%;
+}
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #333;
+}
+
+li {
+  float: left;
+}
+
+li a {
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+
+li a:hover {
+  background-color: #111;
+}
+</style>
+<body>
+
+<center><h1>Project Of Smart Irrigation</h1></center>
+<p id="demo">
+</p>
+
+<ul>
+  <li><a class="active" href="#home">Dashboard</a></li>
+  <li><a href="#contact">Management of sensors</a></li>
+  <li><a href="#about">About</a></li>
+</ul>
+
+<div class="Container">
+	<div class="row">
+		<div class="col-md-6">
+			<canvas id="Temperature" ></canvas>
+		</div>
+		<div class="col-md-6">
+			<canvas class="topLeft" id="Humidite"></canvas>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-6">
+			<canvas id="Erreur"></canvas>
+		</div>
+		<div class="col-md-6">
+			<canvas id="QC"></canvas>
+		</div>
+	</div>
+</div>
+<script>
+time=new Array();
+temperature=new Array();
+humidity=new Array();
+Q_C=new Array();
+Err_debit=new Array();
+const obj = { "limit":10 };
+const dbParam = JSON.stringify(obj);
+const xmlhttp = new XMLHttpRequest();
+xmlhttp.onload =function ma() { 
+myObj = JSON.parse(this.responseText);
+ let text = "";
+var l=myObj.length -25;
+for (let x in myObj) {
+	time[x]=myObj[x][0]; 	
+	temperature[x]=myObj[x].temp_c;
+	humidity[x]=myObj[x].humidity;
+	Q_C[x]=myObj[x].q_courant;
+	Err_debit[x]=myObj[x].Debit;
+ }
+var xValues = time.slice(l);
+tem=new Chart("Temperature", {
+  type: "line",
+  data: {
+    labels: xValues,
+    datasets: [{
+      fill: false,
+      lineTension: 0,
+      backgroundColor: "rgba(0,0,255,1.0)",
+      borderColor: "rgba(0,0,255,0.1)",
+      data: temperature.slice(l)
+    }]
+  },
+  options: {
+	title: {
+      display: true,
+      text: "Temperature"
+    },
+    legend: {display: false},
+    scales: {
+      yAxes: [{ticks: {min: 0, max:60}}],
+    	}
+	  }
+	}
+	
+); 
+hum=new Chart("Humidite", {
+  type: "line",
+  data: {
+    labels: xValues,
+    datasets: [{
+      fill: false,
+      lineTension: 0,
+      backgroundColor: "rgba(0,0,255,1.0)",
+      borderColor: "rgba(0,0,255,0.1)",
+      data: humidity.slice(l)
+    }]
+  },
+  options: {
+	title: {
+      display: true,
+      text: "Humidite"
+    },
+    legend: {display: false},
+    scales: {
+      yAxes: [{ticks: {min: 0, max:60}}],
+    }
+  	
+  }
+});
+qc=new Chart("QC", {
+  type: "line",
+  data: {
+    labels: xValues,
+    datasets: [{
+      fill: false,
+      lineTension: 0,
+      backgroundColor: "rgba(0,0,255,1.0)",
+      borderColor: "rgba(0,0,255,0.1)",
+      data: Q_C.slice(l)
+    }]
+  },
+  options: {
+	title: {
+      display: true,
+      text: "Quantity of courant"
+    },
+    legend: {display: false},
+    scales: {
+      yAxes: [{ticks: {min: 0, max:60}}],
+    }
+
+  }
+});
+err=new Chart("Erreur", {
+  type: "line",
+  data: {
+    labels: xValues,
+    datasets: [{
+      fill: false,
+      lineTension: 0,
+      backgroundColor: "rgba(0,0,255,1.0)",
+      borderColor: "rgba(0,0,255,0.1)",
+      data: Err_debit.slice(l)
+    }]
+  },
+  options: {
+	title: {
+      display: true,
+      text: "Erreur of Debit"
+    },
+    legend: {display: false},
+    scales: {
+      yAxes: [{ticks: {min: 0, max:60}}],
+    }
+}
+  }
+);
+
+document.getElementById("demo").innerHTML = text;
+ };
+ xmlhttp.open("GET", "f.php?x=");
+ xmlhttp.send();
+function real_time(){
+const obj = { "limit":10 };
+const dbParam = JSON.stringify(obj);
+const xmlhttp = new XMLHttpRequest();
+xmlhttp.onload =function ma() { 
+myObj = JSON.parse(this.responseText);
+ let text = "";
+var l=myObj.length -25;
+for (let x in myObj) {
+	time[x]=myObj[x][0]; 	
+	temperature[x]=myObj[x].temp_c;
+	humidity[x]=myObj[x].humidity;
+	Q_C[x]=myObj[x].q_courant;
+	Err_debit[x]=myObj[x].Debit;
+ }
+var xValues = time.slice(l);
+hum.update();
+tem.update();
+err.update();
+qc.update();
+
+document.getElementById("demo").innerHTML = text;
+ };
+ xmlhttp.open("GET", "f.php?x=");
+ xmlhttp.send();
+};
+setInterval(real_time,2000);
+</script>
+</body>
+</html>
+
